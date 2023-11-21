@@ -16,6 +16,7 @@ from pydantic.fields import FieldInfo, _Unset
 from pydantic_core import PydanticUndefined
 
 from invokeai.app.services.config.config_default import InvokeAIAppConfig
+from invokeai.app.services.workflow_records.workflow_records_common import Workflow
 from invokeai.app.shared.fields import FieldDescriptions
 from invokeai.app.util.misc import uuid_string
 
@@ -111,8 +112,6 @@ class UIType(str, Enum):
     # region Misc
     Enum = "enum"
     Scheduler = "Scheduler"
-    WorkflowField = "WorkflowField"
-    IsIntermediate = "IsIntermediate"
     BoardField = "BoardField"
     Any = "Any"
     MetadataItem = "MetadataItem"
@@ -609,7 +608,7 @@ class BaseInvocation(ABC, BaseModel):
     is_intermediate: bool = Field(
         default=False,
         description="Whether or not this is an intermediate invocation.",
-        json_schema_extra={"ui_type": UIType.IsIntermediate, "_field_kind": "internal"},
+        json_schema_extra={"ui_type": "IsIntermediate", "_field_kind": "internal"},
     )
     use_cache: bool = Field(
         default=True, description="Whether or not to use the cache", json_schema_extra={"_field_kind": "internal"}
@@ -813,21 +812,11 @@ def invocation_output(
     return wrapper
 
 
-class WorkflowField(RootModel):
-    """
-    Pydantic model for workflows with custom root of type dict[str, Any].
-    Workflows are stored without a strict schema.
-    """
-
-    root: dict[str, Any] = Field(description="The workflow")
-
-
-WorkflowFieldValidator = TypeAdapter(WorkflowField)
-
-
 class WithWorkflow(BaseModel):
-    workflow: Optional[WorkflowField] = Field(
-        default=None, description=FieldDescriptions.workflow, json_schema_extra={"_field_kind": "internal"}
+    workflow: Optional[Workflow] = Field(
+        default=None,
+        description=FieldDescriptions.workflow,
+        json_schema_extra={"_field_kind": "internal", "ui_type": "WorkflowField"},
     )
 
 

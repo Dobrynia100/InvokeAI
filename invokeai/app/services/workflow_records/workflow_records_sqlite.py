@@ -1,12 +1,15 @@
 import sqlite3
 import threading
 
-from invokeai.app.invocations.baseinvocation import WorkflowField, WorkflowFieldValidator
 from invokeai.app.services.invoker import Invoker
+from invokeai.app.services.shared.pagination import PaginatedResults
 from invokeai.app.services.shared.sqlite import SqliteDatabase
 from invokeai.app.services.workflow_records.workflow_records_base import WorkflowRecordsStorageBase
-from invokeai.app.services.workflow_records.workflow_records_common import WorkflowNotFoundError
-from invokeai.app.util.misc import uuid_string
+from invokeai.app.services.workflow_records.workflow_records_common import (
+    Workflow,
+    WorkflowNotFoundError,
+    WorkflowValidator,
+)
 
 
 class SqliteWorkflowRecordsStorage(WorkflowRecordsStorageBase):
@@ -25,7 +28,7 @@ class SqliteWorkflowRecordsStorage(WorkflowRecordsStorageBase):
     def start(self, invoker: Invoker) -> None:
         self._invoker = invoker
 
-    def get(self, workflow_id: str) -> WorkflowField:
+    def get(self, workflow_id: str) -> Workflow:
         try:
             self._lock.acquire()
             self._cursor.execute(
@@ -39,18 +42,15 @@ class SqliteWorkflowRecordsStorage(WorkflowRecordsStorageBase):
             row = self._cursor.fetchone()
             if row is None:
                 raise WorkflowNotFoundError(f"Workflow with id {workflow_id} not found")
-            return WorkflowFieldValidator.validate_json(row[0])
+            return WorkflowValidator.validate_json(row[0])
         except Exception:
             self._conn.rollback()
             raise
         finally:
             self._lock.release()
 
-    def create(self, workflow: WorkflowField) -> WorkflowField:
+    def create(self, workflow: Workflow) -> Workflow:
         try:
-            # workflows do not have ids until they are saved
-            workflow_id = uuid_string()
-            workflow.root["id"] = workflow_id
             self._lock.acquire()
             self._cursor.execute(
                 """--sql
@@ -65,7 +65,80 @@ class SqliteWorkflowRecordsStorage(WorkflowRecordsStorageBase):
             raise
         finally:
             self._lock.release()
-        return self.get(workflow_id)
+        return self.get(workflow.id)
+
+    def update(self, workflow: Workflow) -> Workflow:
+        try:
+            self._lock.acquire()
+            self._cursor.execute(
+                """--sql
+                UPDATE workflows
+                SET workflow = ?
+                WHERE workflow_id = ?;
+                """,
+                (workflow.model_dump_json(), workflow.id),
+            )
+            self._conn.commit()
+        except Exception:
+            self._conn.rollback()
+            raise
+        finally:
+            self._lock.release()
+        return self.get(workflow.id)
+
+    def delete(self, workflow_id: str) -> None:
+        try:
+            self._lock.acquire()
+            self._cursor.execute(
+                """--sql
+                DELETE from workflows
+                WHERE workflow_id = ?;
+                """,
+                tuple(workflow_id),
+            )
+            self._conn.commit()
+        except Exception:
+            self._conn.rollback()
+            raise
+        finally:
+            self._lock.release()
+        return None
+
+    def get_many(self, page: int = 0, per_page: int = 10) -> PaginatedResults[Workflow]:
+        try:
+            self._lock.acquire()
+            self._cursor.execute(
+                """--sql
+                SELECT workflow
+                FROM workflows
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?;
+                """,
+                (per_page, per_page * page),
+            )
+            rows = self._cursor.fetchall()
+            workflows = [WorkflowValidator.validate_json(row[0]) for row in rows]
+            self._cursor.execute(
+                """--sql
+                SELECT COUNT(*)
+                FROM workflows;
+                """
+            )
+            row = self._cursor.fetchone()
+            total = row[0]
+            pages = int(total / per_page) + 1
+            return PaginatedResults(
+                items=workflows,
+                page=page,
+                per_page=per_page,
+                pages=pages,
+                total=total,
+            )
+        except Exception:
+            self._conn.rollback()
+            raise
+        finally:
+            self._lock.release()
 
     def _create_tables(self) -> None:
         try:
