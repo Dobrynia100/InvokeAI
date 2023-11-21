@@ -146,7 +146,9 @@
         "trainingDesc2": "InvokeAI already supports training custom embeddourings using Textual Inversion using the main script.",
         "txt2img": "Text To Image",
         "unifiedCanvas": "Unified Canvas",
-        "upload": "Upload"
+        "upload": "Upload",
+        "prevPage": "Previous Page",
+        "nextPage": "Next Page"
     },
     "controlnet": {
         "controlAdapter_one": "Control Adapter",
@@ -1304,15 +1306,11 @@
         },
         "compositingBlur": {
             "heading": "Blur",
-            "paragraphs": [
-                "The blur radius of the mask."
-            ]
+            "paragraphs": ["The blur radius of the mask."]
         },
         "compositingBlurMethod": {
             "heading": "Blur Method",
-            "paragraphs": [
-                "The method of blur applied to the masked area."
-            ]
+            "paragraphs": ["The method of blur applied to the masked area."]
         },
         "compositingCoherencePass": {
             "heading": "Coherence Pass",
@@ -1322,9 +1320,7 @@
         },
         "compositingCoherenceMode": {
             "heading": "Mode",
-            "paragraphs": [
-                "The mode of the Coherence Pass."
-            ]
+            "paragraphs": ["The mode of the Coherence Pass."]
         },
         "compositingCoherenceSteps": {
             "heading": "Steps",
@@ -1342,9 +1338,7 @@
         },
         "compositingMaskAdjustments": {
             "heading": "Mask Adjustments",
-            "paragraphs": [
-                "Adjust the mask."
-            ]
+            "paragraphs": ["Adjust the mask."]
         },
         "controlNetBeginEnd": {
             "heading": "Begin / End Step Percentage",
@@ -1402,9 +1396,7 @@
         },
         "infillMethod": {
             "heading": "Infill Method",
-            "paragraphs": [
-                "Method to infill the selected area."
-            ]
+            "paragraphs": ["Method to infill the selected area."]
         },
         "lora": {
             "heading": "LoRA Weight",
@@ -1554,5 +1546,13 @@
         "showIntermediates": "Show Intermediates",
         "snapToGrid": "Snap to Grid",
         "undo": "Undo"
+    },
+    "workflows": {
+        "workflowLibrary": "Workflow Library",
+        "imageCategory": "Image",
+        "userCategory": "User",
+        "systemCategory": "System",
+        "loadWorkflow": "$t(nodes.loadWorkflow)",
+        "deleteWorkflow": "Delete Workflow"
     }
 }

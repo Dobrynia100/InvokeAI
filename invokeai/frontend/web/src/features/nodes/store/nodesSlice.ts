@@ -73,7 +73,7 @@ const initialNodeExecutionState: Omit<NodeExecutionState, 'nodeId'> = {
   outputs: [],
 };
 
-export const initialWorkflow = {
+export const initialWorkflow: Omit<Workflow, 'nodes' | 'edges'> = {
   meta: {
     version: WORKFLOW_FORMAT_VERSION,
   },
@@ -85,6 +85,7 @@ export const initialWorkflow = {
   contact: '',
   version: '',
   exposedFields: [],
+  category: 'image',
 };
 
 export const initialNodesState: NodesState = {

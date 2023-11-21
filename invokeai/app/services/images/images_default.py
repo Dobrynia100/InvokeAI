@@ -5,7 +5,7 @@ from PIL.Image import Image as PILImageType
 from invokeai.app.invocations.baseinvocation import MetadataField
 from invokeai.app.services.invoker import Invoker
 from invokeai.app.services.shared.pagination import OffsetPaginatedResults
-from invokeai.app.services.workflow_records.workflow_records_common import Workflow
+from invokeai.app.services.workflow_records.workflow_records_common import Workflow, WorkflowRecordDTO
 
 from ..image_files.image_files_common import (
     ImageFileDeleteException,
@@ -58,7 +58,8 @@ class ImageService(ImageServiceABC):
         try:
             if workflow is not None:
                 created_workflow = self.__invoker.services.workflow_records.create(workflow)
-                workflow_id = created_workflow.model_dump()["id"]
+                workflow_id = created_workflow.workflow_id
+                workflow = created_workflow.workflow
             else:
                 workflow_id = None
 
@@ -165,7 +166,7 @@ class ImageService(ImageServiceABC):
             self.__invoker.services.logger.error("Problem getting image DTO")
             raise e
 
-    def get_workflow(self, image_name: str) -> Optional[Workflow]:
+    def get_workflow(self, image_name: str) -> Optional[WorkflowRecordDTO]:
         try:
             workflow_id = self.__invoker.services.workflow_image_records.get_workflow_for_image(image_name)
             if workflow_id is None:

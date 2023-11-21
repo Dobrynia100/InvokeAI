@@ -1,8 +1,15 @@
+from typing import Optional
+
 from fastapi import APIRouter, Body, HTTPException, Path, Query
 
 from invokeai.app.api.dependencies import ApiDependencies
 from invokeai.app.services.shared.pagination import PaginatedResults
-from invokeai.app.services.workflow_records.workflow_records_common import Workflow, WorkflowNotFoundError
+from invokeai.app.services.workflow_records.workflow_records_common import (
+    Workflow,
+    WorkflowCategory,
+    WorkflowNotFoundError,
+    WorkflowRecordDTO,
+)
 
 workflows_router = APIRouter(prefix="/v1/workflows", tags=["workflows"])
 
@@ -11,12 +18,12 @@ workflows_router = APIRouter(prefix="/v1/workflows", tags=["workflows"])
     "/i/{workflow_id}",
     operation_id="get_workflow",
     responses={
-        200: {"model": Workflow},
+        200: {"model": WorkflowRecordDTO},
     },
 )
 async def get_workflow(
     workflow_id: str = Path(description="The workflow to get"),
-) -> Workflow:
+) -> WorkflowRecordDTO:
     """Gets a workflow"""
     try:
         return ApiDependencies.invoker.services.workflow_records.get(workflow_id)
@@ -28,12 +35,12 @@ async def get_workflow(
     "/",
     operation_id="create_workflow",
     responses={
-        200: {"model": Workflow},
+        200: {"model": WorkflowRecordDTO},
     },
 )
 async def create_workflow(
     workflow: Workflow = Body(description="The workflow to create", embed=True),
-) -> Workflow:
+) -> WorkflowRecordDTO:
     """Creates a workflow"""
     return ApiDependencies.invoker.services.workflow_records.create(workflow)
 
@@ -47,7 +54,7 @@ async def create_workflow(
 )
 async def update_workflow(
     workflow: Workflow = Body(description="The workflow to update", embed=True),
-) -> Workflow:
+) -> WorkflowRecordDTO:
     """Updates a workflow"""
     return ApiDependencies.invoker.services.workflow_records.update(workflow)
 
@@ -67,12 +74,13 @@ async def delete_workflow(
     "/",
     operation_id="list_workflows",
     responses={
-        200: {"model": PaginatedResults[Workflow]},
+        200: {"model": PaginatedResults[WorkflowRecordDTO]},
     },
 )
 async def list_workflows(
-    page: int = Query(default=0),
-    per_page: int = Query(default=10),
-) -> PaginatedResults[Workflow]:
+    page: int = Query(default=0, description="The page to get"),
+    per_page: int = Query(default=10, description="The number of workflows per page"),
+    category: Optional[WorkflowCategory] = Query(default=None, description="The category of workflows to get"),
+) -> PaginatedResults[WorkflowRecordDTO]:
     """Deletes a workflow"""
-    return ApiDependencies.invoker.services.workflow_records.get_many(page=page, per_page=per_page)
+    return ApiDependencies.invoker.services.workflow_records.get_many(page=page, per_page=per_page, category=category)

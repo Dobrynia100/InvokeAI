@@ -1603,7 +1603,11 @@ export type WorkflowWarning = {
 
 const CURRENT_WORKFLOW_VERSION = '1.0.0';
 
+export const zWorkflowCategory = z.enum(['image', 'user', 'system']);
+export type WorkflowCategory = z.infer<typeof zWorkflowCategory>;
+
 export const zWorkflow = z.object({
+  id: z.string().min(1).optional(),
   name: z.string().default(''),
   author: z.string().default(''),
   description: z.string().default(''),
@@ -1611,14 +1615,15 @@ export const zWorkflow = z.object({
   contact: z.string().default(''),
   tags: z.string().default(''),
   notes: z.string().default(''),
-  nodes: z.array(zWorkflowNode).default([]),
-  edges: z.array(zWorkflowEdge).default([]),
   exposedFields: z.array(zFieldIdentifier).default([]),
+  category: zWorkflowCategory.default('user'),
   meta: z
     .object({
       version: zSemVer,
     })
     .default({ version: CURRENT_WORKFLOW_VERSION }),
+  nodes: z.array(zWorkflowNode).default([]),
+  edges: z.array(zWorkflowEdge).default([]),
 });
 
 export const zValidatedWorkflow = zWorkflow.transform((workflow) => {

@@ -1,24 +1,25 @@
 from abc import ABC, abstractmethod
-from invokeai.app.services.shared.pagination import PaginatedResults
+from typing import Optional
 
-from invokeai.app.services.workflow_records.workflow_records_common import Workflow
+from invokeai.app.services.shared.pagination import PaginatedResults
+from invokeai.app.services.workflow_records.workflow_records_common import Workflow, WorkflowCategory, WorkflowRecordDTO
 
 
 class WorkflowRecordsStorageBase(ABC):
     """Base class for workflow storage services."""
 
     @abstractmethod
-    def get(self, workflow_id: str) -> Workflow:
+    def get(self, workflow_id: str) -> WorkflowRecordDTO:
         """Get workflow by id."""
         pass
 
     @abstractmethod
-    def create(self, workflow: Workflow) -> Workflow:
+    def create(self, workflow: Workflow) -> WorkflowRecordDTO:
         """Creates a workflow."""
         pass
 
     @abstractmethod
-    def update(self, workflow: Workflow) -> Workflow:
+    def update(self, workflow: Workflow) -> WorkflowRecordDTO:
         """Updates a workflow."""
         pass
 
@@ -28,6 +29,8 @@ class WorkflowRecordsStorageBase(ABC):
         pass
 
     @abstractmethod
-    def get_many(self, page: int = 0, per_page: int = 10) -> PaginatedResults[Workflow]:
+    def get_many(
+        self, page: int, per_page: int, category: Optional[WorkflowCategory] = None
+    ) -> PaginatedResults[WorkflowRecordDTO]:
         """Gets many workflows."""
         pass
