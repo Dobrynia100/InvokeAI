@@ -54,15 +54,15 @@ class UIType(str, Enum):
     """
 
     # region Primitives
-    Boolean = "boolean"
+    Boolean = "BooleanField"
     Color = "ColorField"
     Conditioning = "ConditioningField"
     Control = "ControlField"
-    Float = "float"
+    Float = "FloatField"
     Image = "ImageField"
-    Integer = "integer"
+    Integer = "IntegerField"
     Latents = "LatentsField"
-    String = "string"
+    String = "StringField"
     # endregion
 
     # region Collection Primitives
@@ -109,8 +109,8 @@ class UIType(str, Enum):
     # endregion
 
     # region Misc
-    Enum = "enum"
-    Scheduler = "Scheduler"
+    Enum = "EnumField"
+    Scheduler = "SchedulerField"
     WorkflowField = "WorkflowField"
     IsIntermediate = "IsIntermediate"
     BoardField = "BoardField"

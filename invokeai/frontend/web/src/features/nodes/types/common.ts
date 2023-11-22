@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zFieldType } from './fieldTypes';
 import { zBaseModel } from 'features/parameters/types/parameterSchemas';
 
 export const zFieldInput = z.enum(['connection', 'direct', 'any']);
@@ -10,16 +9,6 @@ export const zFieldInput = z.enum(['connection', 'direct', 'any']);
  * - "any": accepts both connections and direct values
  */
 export type FieldInput = z.infer<typeof zFieldInput>;
-
-export const zFieldDataBase = z.object({
-  id: z.string().trim().min(1),
-  name: z.string().trim().min(1),
-  type: zFieldType,
-});
-/**
- * Base for all field values.
- */
-export type FieldDataBase = z.infer<typeof zFieldDataBase>;
 
 export const zFieldUIComponent = z.enum(['none', 'textarea', 'slider']);
 /**

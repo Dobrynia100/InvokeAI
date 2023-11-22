@@ -1325,7 +1325,7 @@ export type InvocationSchemaExtra = {
   title: string;
   category?: string;
   tags?: string[];
-  version?: string;
+  version: string;
   properties: Omit<
     NonNullable<OpenAPIV3_1.SchemaObject['properties']> &
       (_InputField | _OutputField),
