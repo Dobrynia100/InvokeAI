@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { stateSelector } from 'app/store/store';
 import { defaultSelectorOptions } from 'app/store/util/defaultMemoizeOptions';
 import { colorTokenToCssVar } from 'common/util/colorTokenToCssVar';
-import { isInvocationNode } from 'features/nodes/types/types';
+import { isInvocationNode } from 'features/nodes/types/invocation';
 import { getFieldColor } from './getEdgeColor';
 
 export const makeEdgeSelector = (

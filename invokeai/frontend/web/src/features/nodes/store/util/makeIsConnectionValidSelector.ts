@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { stateSelector } from 'app/store/store';
-import { FieldType } from 'features/nodes/types/types';
+import { FieldType } from 'features/nodes/types/field';
 import i18n from 'i18next';
 import { HandleType } from 'reactflow';
 import { getIsGraphAcyclic } from './getIsGraphAcyclic';
@@ -15,7 +15,7 @@ export const makeConnectionErrorSelector = (
   nodeId: string,
   fieldName: string,
   handleType: HandleType,
-  fieldType?: FieldType | string
+  fieldType?: FieldType
 ) => {
   return createSelector(stateSelector, (state) => {
     if (!fieldType) {
@@ -80,7 +80,7 @@ export const makeConnectionErrorSelector = (
         return edge.target === target && edge.targetHandle === targetHandle;
       }) &&
       // except CollectionItem inputs can have multiples
-      targetType !== 'CollectionItem'
+      targetType.name !== 'CollectionItem'
     ) {
       return i18n.t('nodes.inputMayOnlyHaveOneConnection');
     }

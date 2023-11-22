@@ -6,22 +6,21 @@ import {
   Viewport,
   XYPosition,
 } from 'reactflow';
+import { FieldIdentifier, FieldType } from '../types/field';
 import {
-  FieldIdentifier,
-  FieldType,
+  AnyNodeData,
   InvocationEdgeExtra,
   InvocationTemplate,
-  NodeData,
   NodeExecutionState,
-  Workflow,
-} from '../types/types';
+} from '../types/invocation';
+import { Workflow } from '../types/types';
 
 export type NodesState = {
-  nodes: Node<NodeData>[];
+  nodes: Node<AnyNodeData>[];
   edges: Edge<InvocationEdgeExtra>[];
   nodeTemplates: Record<string, InvocationTemplate>;
   connectionStartParams: OnConnectStartParams | null;
-  connectionStartFieldType: FieldType | string | null;
+  connectionStartFieldType: FieldType | null;
   connectionMade: boolean;
   modifyingEdge: boolean;
   shouldShowFieldTypeLegend: boolean;
@@ -39,7 +38,7 @@ export type NodesState = {
   isReady: boolean;
   mouseOverField: FieldIdentifier | null;
   mouseOverNode: string | null;
-  nodesToCopy: Node<NodeData>[];
+  nodesToCopy: Node<AnyNodeData>[];
   edgesToCopy: Edge<InvocationEdgeExtra>[];
   isAddNodePopoverOpen: boolean;
   addNewNodePosition: XYPosition | null;

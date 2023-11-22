@@ -1,17 +1,14 @@
 import { Tooltip } from '@chakra-ui/react';
 import { colorTokenToCssVar } from 'common/util/colorTokenToCssVar';
-import {
-  getIsCollection,
-  getIsPolymorphic,
-} from 'features/nodes/store/util/parseFieldType';
+import { useFieldTypeName } from 'features/nodes/hooks/usePrettyFieldType';
 import {
   HANDLE_TOOLTIP_OPEN_DELAY,
   MODEL_TYPES,
 } from 'features/nodes/types/constants';
 import {
-  InputFieldTemplate,
-  OutputFieldTemplate,
-} from 'features/nodes/types/types';
+  FieldInputTemplate,
+  FieldOutputTemplate,
+} from 'features/nodes/types/field';
 import { CSSProperties, memo, useMemo } from 'react';
 import { Handle, HandleType, Position } from 'reactflow';
 import { getFieldColor } from '../../../edges/util/getEdgeColor';
@@ -34,7 +31,7 @@ export const outputHandleStyles: CSSProperties = {
 };
 
 type FieldHandleProps = {
-  fieldTemplate: InputFieldTemplate | OutputFieldTemplate;
+  fieldTemplate: FieldInputTemplate | FieldOutputTemplate;
   handleType: HandleType;
   isConnectionInProgress: boolean;
   isConnectionStartField: boolean;
@@ -50,20 +47,20 @@ const FieldHandle = (props: FieldHandleProps) => {
     connectionError,
   } = props;
   const { name } = fieldTemplate;
-  const type = fieldTemplate.originalType ?? fieldTemplate.type;
-
+  const type = fieldTemplate.type;
+  const fieldTypeName = useFieldTypeName(type);
   const styles: CSSProperties = useMemo(() => {
-    const isCollection = getIsCollection(fieldTemplate.type);
-    const isPolymorphic = getIsPolymorphic(fieldTemplate.type);
-    const isModelType = MODEL_TYPES.some((t) => t === type);
+    const isModelType = MODEL_TYPES.some((t) => t === type.name);
     const color = getFieldColor(type);
     const s: CSSProperties = {
       backgroundColor:
-        isCollection || isPolymorphic ? colorTokenToCssVar('base.900') : color,
+        type.isCollection || type.isPolymorphic
+          ? colorTokenToCssVar('base.900')
+          : color,
       position: 'absolute',
       width: '1rem',
       height: '1rem',
-      borderWidth: isCollection || isPolymorphic ? 4 : 0,
+      borderWidth: type.isCollection || type.isPolymorphic ? 4 : 0,
       borderStyle: 'solid',
       borderColor: color,
       borderRadius: isModelType ? 4 : '100%',
@@ -93,7 +90,6 @@ const FieldHandle = (props: FieldHandleProps) => {
     return s;
   }, [
     connectionError,
-    fieldTemplate.type,
     handleType,
     isConnectionInProgress,
     isConnectionStartField,
@@ -104,8 +100,8 @@ const FieldHandle = (props: FieldHandleProps) => {
     if (isConnectionInProgress && connectionError) {
       return connectionError;
     }
-    return type;
-  }, [connectionError, isConnectionInProgress, type]);
+    return fieldTypeName;
+  }, [connectionError, fieldTypeName, isConnectionInProgress]);
 
   return (
     <Tooltip

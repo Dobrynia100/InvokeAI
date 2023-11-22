@@ -868,5 +868,7 @@ MetadataFieldValidator = TypeAdapter(MetadataField)
 
 class WithMetadata(BaseModel):
     metadata: Optional[MetadataField] = Field(
-        default=None, description=FieldDescriptions.metadata, json_schema_extra={"_field_kind": "internal"}
+        default=None,
+        description=FieldDescriptions.metadata,
+        json_schema_extra={"_field_kind": "internal", "input": Input.Connection},
     )

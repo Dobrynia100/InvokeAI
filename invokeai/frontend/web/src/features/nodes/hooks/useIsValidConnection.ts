@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { Connection, Node, useReactFlow } from 'reactflow';
 import { validateSourceAndTargetTypes } from '../store/util/validateSourceAndTargetTypes';
 import { getIsGraphAcyclic } from '../store/util/getIsGraphAcyclic';
-import { InvocationNodeData } from '../types/types';
+import { InvocationNodeData } from '../types/invocation';
 
 /**
  * NOTE: The logic here must be duplicated in `invokeai/frontend/web/src/features/nodes/store/util/makeIsConnectionValidSelector.ts`
@@ -70,18 +70,13 @@ export const useIsValidConnection = () => {
           return edge.target === target && edge.targetHandle === targetHandle;
         }) &&
         // except CollectionItem inputs can have multiples
-        targetField.type !== 'CollectionItem'
+        targetField.type.name !== 'CollectionItem'
       ) {
         return false;
       }
 
       // Must use the originalType here if it exists
-      if (
-        !validateSourceAndTargetTypes(
-          sourceField?.originalType ?? sourceField.type,
-          targetField?.originalType ?? targetField.type
-        )
-      ) {
+      if (!validateSourceAndTargetTypes(sourceField.type, targetField.type)) {
         return false;
       }
 

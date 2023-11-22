@@ -17,7 +17,7 @@ import {
   InvocationNodeData,
   InvocationTemplate,
   isInvocationNode,
-} from 'features/nodes/types/types';
+} from 'features/nodes/types/invocation';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaSync } from 'react-icons/fa';

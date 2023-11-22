@@ -1,6 +1,5 @@
 import { isArray, isNumber, startCase } from 'lodash-es';
 import { OpenAPIV3_1 } from 'openapi-types';
-import { getIsPolymorphic } from '../store/util/parseFieldType';
 import {
   BoardFieldInputTemplate,
   BooleanFieldInputTemplate,
@@ -22,7 +21,7 @@ import {
   StringFieldInputTemplate,
   T2IAdapterModelFieldInputTemplate,
   VAEModelFieldInputTemplate,
-} from '../types/fields';
+} from '../types/field';
 import {
   InvocationFieldSchema,
   InvocationSchemaObject,
@@ -31,7 +30,7 @@ import {
   isNonArraySchemaObject,
   isRefObject,
   isSchemaObject,
-} from '../types/types';
+} from '../types/openapi';
 
 export type BaseFieldProperties = 'name' | 'title' | 'description';
 
@@ -320,6 +319,13 @@ const buildSchedulerFieldInputTemplate: FieldInputTemplateBuilder<
   return template;
 };
 
+const OPENAPI_TYPE_MAP: Record<string, string> = {
+  integer: 'IntegerField',
+  number: 'FloatField',
+  string: 'StringField',
+  boolean: 'BooleanField',
+};
+
 export const getFieldType = (
   schemaObject: OpenAPIV3_1SchemaOrRef
 ): FieldType | undefined => {
@@ -420,60 +426,48 @@ export const getFieldType = (
       return { name: 'EnumField', isCollection: false, isPolymorphic: false };
     } else if (schemaObject.type) {
       if (schemaObject.type === 'array') {
-        const itemType = isSchemaObject(schemaObject.items)
-          ? schemaObject.items.type
-          : refObjectToSchemaName(schemaObject.items);
-
-        if (!itemType) {
-          return;
+        // We need to get the type of the items
+        if (isSchemaObject(schemaObject.items)) {
+          const itemType = schemaObject.items.type;
+          if (!itemType || isArray(itemType)) {
+            return;
+          }
+          // This is an OpenAPI primitive - 'null', 'object', 'array', 'integer', 'number', 'string', 'boolean'
+          const name = OPENAPI_TYPE_MAP[itemType];
+          if (!name) {
+            // it's 'null', 'object', or 'array' - skip
+            return;
+          }
+          return {
+            name,
+            isCollection: true,
+            isPolymorphic: false,
+          };
         }
 
-        if (isArray(itemType)) {
-          // This is a nested array, which we don't support
+        // This is a ref object, extract the type name
+        const name = refObjectToSchemaName(schemaObject.items);
+        if (!name) {
+          // something has gone terribly awry
           return;
         }
-
         return {
-          name: itemType,
+          name,
           isCollection: true,
           isPolymorphic: false,
         };
-      } else if (
-        !isArray(schemaObject.type) &&
-        schemaObject.type !== 'null' && // 'null' is not valid
-        schemaObject.type !== 'object' // 'object' is not valid
-      ) {
-        if (schemaObject.type === 'boolean') {
-          return {
-            name: 'BooleanField',
-            isCollection: false,
-            isPolymorphic: false,
-          };
+      } else if (!isArray(schemaObject.type)) {
+        // This is an OpenAPI primitive - 'null', 'object', 'array', 'integer', 'number', 'string', 'boolean'
+        const name = OPENAPI_TYPE_MAP[schemaObject.type];
+        if (!name) {
+          // it's 'null', 'object', or 'array' - skip
+          return;
         }
-
-        if (schemaObject.type === 'integer') {
-          return {
-            name: 'IntegerField',
-            isCollection: false,
-            isPolymorphic: false,
-          };
-        }
-
-        if (schemaObject.type === 'number') {
-          return {
-            name: 'FloatField',
-            isCollection: false,
-            isPolymorphic: false,
-          };
-        }
-
-        if (schemaObject.type === 'string') {
-          return {
-            name: 'StringField',
-            isCollection: false,
-            isPolymorphic: false,
-          };
-        }
+        return {
+          name,
+          isCollection: false,
+          isPolymorphic: false,
+        };
       }
     }
   } else if (isRefObject(schemaObject)) {
@@ -534,7 +528,6 @@ export const buildInputFieldTemplate = (
   } = fieldSchema;
 
   const extra = {
-    // TODO: Can we support polymorphic inputs in the UI?
     input:
       fieldType.isCollection || fieldType.isPolymorphic ? 'connection' : input,
     ui_hidden,

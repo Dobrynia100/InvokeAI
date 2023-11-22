@@ -3,20 +3,20 @@ import { useAppDispatch } from 'app/store/storeHooks';
 import IAIMantineSelect from 'common/components/IAIMantineSelect';
 import { fieldIPAdapterModelValueChanged } from 'features/nodes/store/nodesSlice';
 import {
-  IPAdapterModelInputFieldTemplate,
-  IPAdapterModelInputFieldValue,
+  IPAdapterModelFieldInputTemplate,
+  IPAdapterModelFieldInputInstance,
   FieldComponentProps,
-} from 'features/nodes/types/types';
+} from 'features/nodes/types/field';
 import { MODEL_TYPE_MAP } from 'features/parameters/types/constants';
 import { modelIdToIPAdapterModelParam } from 'features/parameters/util/modelIdToIPAdapterModelParams';
 import { forEach } from 'lodash-es';
 import { memo, useCallback, useMemo } from 'react';
 import { useGetIPAdapterModelsQuery } from 'services/api/endpoints/models';
 
-const IPAdapterModelInputFieldComponent = (
+const IPAdapterModelFieldInputComponent = (
   props: FieldComponentProps<
-    IPAdapterModelInputFieldValue,
-    IPAdapterModelInputFieldTemplate
+    IPAdapterModelFieldInputInstance,
+    IPAdapterModelFieldInputTemplate
   >
 ) => {
   const { nodeId, field } = props;
@@ -97,4 +97,4 @@ const IPAdapterModelInputFieldComponent = (
   );
 };
 
-export default memo(IPAdapterModelInputFieldComponent);
+export default memo(IPAdapterModelFieldInputComponent);

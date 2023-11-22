@@ -1316,10 +1316,6 @@ export const isInputFieldTemplate = (
  * JANKY CUSTOMISATION OF OpenAPI SCHEMA TYPES
  */
 
-export type TypeHints = {
-  [fieldName: string]: FieldType;
-};
-
 export type InvocationSchemaExtra = {
   output: OpenAPIV3_1.ReferenceObject; // the output of the invocation
   title: string;

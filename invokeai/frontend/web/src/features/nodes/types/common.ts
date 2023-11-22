@@ -16,7 +16,7 @@ export const zFieldUIComponent = z.enum(['none', 'textarea', 'slider']);
  */
 export type FieldUIComponent = z.infer<typeof zFieldUIComponent>;
 
-// Fields that have a single value
+// #region Field value schemas (direct values)
 
 export const zImageField = z.object({
   image_name: z.string().trim().min(1),
@@ -145,3 +145,16 @@ export const zT2IAdapterField = z.object({
     .optional(),
 });
 export type T2IAdapterField = z.infer<typeof zT2IAdapterField>;
+
+// #endregion
+
+// #region ProgressImage
+
+export const zProgressImage = z.object({
+  dataURL: z.string(),
+  width: z.number().int(),
+  height: z.number().int(),
+});
+export type ProgressImage = z.infer<typeof zProgressImage>;
+
+// #endregion

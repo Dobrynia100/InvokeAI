@@ -3,7 +3,7 @@ import { compare } from 'compare-versions';
 import { useNodeData } from 'features/nodes/hooks/useNodeData';
 import { useNodeTemplate } from 'features/nodes/hooks/useNodeTemplate';
 import { useNodeVersion } from 'features/nodes/hooks/useNodeVersion';
-import { isInvocationNodeData } from 'features/nodes/types/types';
+import { isInvocationNodeData } from 'features/nodes/types/invocation';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaInfoCircle } from 'react-icons/fa';
@@ -41,6 +41,7 @@ const TooltipContent = memo(({ nodeId }: { nodeId: string }) => {
   const { t } = useTranslation();
 
   const title = useMemo(() => {
+    console.log({ data, nodeTemplate });
     if (data?.label && nodeTemplate?.title) {
       return `${data.label} (${nodeTemplate.title})`;
     }

@@ -1,13 +1,13 @@
 import { compareVersions } from 'compare-versions';
 import { cloneDeep, keyBy } from 'lodash-es';
 import {
-  InvocationTemplate,
   Workflow,
   WorkflowWarning,
   isWorkflowInvocationNode,
 } from '../types/types';
 import { parseify } from 'common/util/serialize';
 import i18n from 'i18next';
+import { InvocationTemplate } from '../types/invocation';
 
 export const validateWorkflow = (
   workflow: Workflow,

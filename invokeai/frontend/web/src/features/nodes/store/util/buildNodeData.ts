@@ -1,23 +1,24 @@
 import { DRAG_HANDLE_CLASSNAME } from 'features/nodes/types/constants';
 import {
+  FieldInputInstance,
+  FieldOutputInstance,
+} from 'features/nodes/types/field';
+import {
   CurrentImageNodeData,
-  InputFieldValue,
   InvocationNodeData,
   InvocationTemplate,
   NotesNodeData,
-  OutputFieldValue,
-} from 'features/nodes/types/types';
-import { buildInputFieldValue } from 'features/nodes/util/fieldValueBuilders';
+} from 'features/nodes/types/invocation';
+import { buildFieldInputInstance } from 'features/nodes/util/fieldValueBuilders';
 import { reduce } from 'lodash-es';
 import { Node, XYPosition } from 'reactflow';
-import { AnyInvocationType } from 'services/events/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export const SHARED_NODE_PROPERTIES: Partial<Node> = {
   dragHandle: `.${DRAG_HANDLE_CLASSNAME}`,
 };
 export const buildNodeData = (
-  type: AnyInvocationType | 'current_image' | 'notes',
+  type: string,
   position: XYPosition,
   template?: InvocationTemplate
 ):
@@ -72,7 +73,7 @@ export const buildNodeData = (
     (inputsAccumulator, inputTemplate, inputName) => {
       const fieldId = uuidv4();
 
-      const inputFieldValue: InputFieldValue = buildInputFieldValue(
+      const inputFieldValue: FieldInputInstance = buildFieldInputInstance(
         fieldId,
         inputTemplate
       );
@@ -81,7 +82,7 @@ export const buildNodeData = (
 
       return inputsAccumulator;
     },
-    {} as Record<string, InputFieldValue>
+    {} as Record<string, FieldInputInstance>
   );
 
   const outputs = reduce(
@@ -89,19 +90,18 @@ export const buildNodeData = (
     (outputsAccumulator, outputTemplate, outputName) => {
       const fieldId = uuidv4();
 
-      const outputFieldValue: OutputFieldValue = {
+      const outputFieldValue: FieldOutputInstance = {
         id: fieldId,
         name: outputName,
         type: outputTemplate.type,
         fieldKind: 'output',
-        originalType: outputTemplate.originalType,
       };
 
       outputsAccumulator[outputName] = outputFieldValue;
 
       return outputsAccumulator;
     },
-    {} as Record<string, OutputFieldValue>
+    {} as Record<string, FieldOutputInstance>
   );
 
   const invocation: Node<InvocationNodeData> = {
@@ -118,9 +118,9 @@ export const buildNodeData = (
       isOpen: true,
       embedWorkflow: false,
       isIntermediate: type === 'save_image' ? false : true,
+      useCache: template.useCache,
       inputs,
       outputs,
-      useCache: template.useCache,
     },
   };
 

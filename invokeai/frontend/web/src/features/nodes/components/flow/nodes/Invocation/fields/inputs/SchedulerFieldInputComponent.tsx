@@ -5,10 +5,10 @@ import { defaultSelectorOptions } from 'app/store/util/defaultMemoizeOptions';
 import IAIMantineSearchableSelect from 'common/components/IAIMantineSearchableSelect';
 import { fieldSchedulerValueChanged } from 'features/nodes/store/nodesSlice';
 import {
-  SchedulerInputFieldTemplate,
-  SchedulerInputFieldValue,
+  SchedulerFieldInputTemplate,
+  SchedulerFieldInputInstance,
   FieldComponentProps,
-} from 'features/nodes/types/types';
+} from 'features/nodes/types/field';
 import {
   SCHEDULER_LABEL_MAP,
   SchedulerParam,
@@ -36,10 +36,10 @@ const selector = createSelector(
   defaultSelectorOptions
 );
 
-const SchedulerInputField = (
+const SchedulerFieldInputComponent = (
   props: FieldComponentProps<
-    SchedulerInputFieldValue,
-    SchedulerInputFieldTemplate
+    SchedulerFieldInputInstance,
+    SchedulerFieldInputTemplate
   >
 ) => {
   const { nodeId, field } = props;
@@ -72,4 +72,4 @@ const SchedulerInputField = (
   );
 };
 
-export default memo(SchedulerInputField);
+export default memo(SchedulerFieldInputComponent);

@@ -9,18 +9,18 @@ import { Node } from 'reactflow';
 import { AnyInvocationType } from 'services/events/types';
 import { nodeReplaced } from '../store/nodesSlice';
 import { buildNodeData } from '../store/util/buildNodeData';
-import {
-  InvocationNodeData,
-  InvocationTemplate,
-  NodeData,
-  isInvocationNode,
-  zParsedSemver,
-} from '../types/types';
 import { useAppToaster } from 'app/components/Toaster';
 import { useTranslation } from 'react-i18next';
+import {
+  AnyNodeData,
+  InvocationNodeData,
+  InvocationTemplate,
+  isInvocationNode,
+} from '../types/invocation';
+import { zParsedSemver } from '../types/semver';
 
 export const getNeedsUpdate = (
-  node?: Node<NodeData>,
+  node?: Node<AnyNodeData>,
   template?: InvocationTemplate
 ) => {
   if (!isInvocationNode(node) || !template) {
@@ -30,7 +30,7 @@ export const getNeedsUpdate = (
 };
 
 export const getMayUpdateNode = (
-  node?: Node<NodeData>,
+  node?: Node<AnyNodeData>,
   template?: InvocationTemplate
 ) => {
   const needsUpdate = getNeedsUpdate(node, template);
@@ -48,7 +48,7 @@ export const getMayUpdateNode = (
 };
 
 export const updateNode = (
-  node?: Node<NodeData>,
+  node?: Node<AnyNodeData>,
   template?: InvocationTemplate
 ) => {
   const mayUpdate = getMayUpdateNode(node, template);

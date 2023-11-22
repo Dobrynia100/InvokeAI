@@ -1,7 +1,8 @@
-import { FieldType, InputFieldTemplate, InputFieldValue } from '../types/types';
+import { FieldInputInstance, FieldInputTemplate } from '../types/field';
+import { InputFieldValue } from '../types/types';
 
 const FIELD_VALUE_FALLBACK_MAP: {
-  [key in FieldType]: InputFieldValue['value'];
+  [key in string]: InputFieldValue['value'];
 } = {
   Any: undefined,
   enum: '',
@@ -65,10 +66,10 @@ const FIELD_VALUE_FALLBACK_MAP: {
   CustomPolymorphic: undefined,
 };
 
-export const buildInputFieldValue = (
+export const buildFieldInputInstance = (
   id: string,
-  template: InputFieldTemplate
-): InputFieldValue => {
+  template: FieldInputTemplate
+): FieldInputInstance => {
   // TODO: this should be `fieldValue: InputFieldValue`, but that introduces a TS issue I couldn't
   // resolve - for some reason, it doesn't like `template.type`, which is the discriminant for both
   // `InputFieldTemplate` union. It is (type-structurally) equal to the discriminant for the
@@ -78,10 +79,9 @@ export const buildInputFieldValue = (
     name: template.name,
     type: template.type,
     label: '',
-    fieldKind: 'input',
-    originalType: template.originalType,
-    value: template.default ?? FIELD_VALUE_FALLBACK_MAP[template.type],
-  } as InputFieldValue;
+    fieldKind: 'input' as const,
+    value: template.default ?? FIELD_VALUE_FALLBACK_MAP[template.type.name],
+  };
 
   return fieldValue;
 };

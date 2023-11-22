@@ -20,7 +20,6 @@ import {
   XYPosition,
 } from 'reactflow';
 import { receivedOpenAPISchema } from 'services/api/thunks/schema';
-import { ImageField } from 'services/api/types';
 import {
   appSocketGeneratorProgress,
   appSocketInvocationComplete,
@@ -31,42 +30,42 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { DRAG_HANDLE_CLASSNAME } from '../types/constants';
 import {
-  BoardInputFieldValue,
-  BooleanInputFieldValue,
-  ColorInputFieldValue,
-  ControlNetModelInputFieldValue,
-  CurrentImageNodeData,
-  EnumInputFieldValue,
+  BoardFieldValue,
+  BooleanFieldValue,
+  ColorFieldValue,
+  ControlNetModelFieldValue,
+  EnumFieldValue,
   FieldIdentifier,
-  FloatInputFieldValue,
-  ImageInputFieldValue,
-  InputFieldValue,
-  IntegerInputFieldValue,
-  InvocationNodeData,
+  FieldValue,
+  FloatFieldValue,
+  ImageFieldValue,
+  IntegerFieldValue,
+  IPAdapterModelFieldValue,
+  LoRAModelFieldValue,
+  MainModelFieldValue,
+  SchedulerFieldValue,
+  SDXLRefinerModelFieldValue,
+  StringFieldValue,
+  T2IAdapterModelFieldValue,
+  VAEModelFieldValue,
+} from '../types/field';
+import {
+  AnyNodeData,
   InvocationTemplate,
-  IPAdapterModelInputFieldValue,
   isInvocationNode,
   isNotesNode,
-  LoRAModelInputFieldValue,
-  MainModelInputFieldValue,
   NodeExecutionState,
-  NodeStatus,
-  NotesNodeData,
-  SchedulerInputFieldValue,
-  SDXLRefinerModelInputFieldValue,
-  StringInputFieldValue,
-  T2IAdapterModelInputFieldValue,
-  VaeModelInputFieldValue,
-  Workflow,
-} from '../types/types';
+  zNodeStatus,
+} from '../types/invocation';
+import { Workflow } from '../types/types';
 import { NodesState } from './types';
-import { findUnoccupiedPosition } from './util/findUnoccupiedPosition';
 import { findConnectionToValidHandle } from './util/findConnectionToValidHandle';
+import { findUnoccupiedPosition } from './util/findUnoccupiedPosition';
 
 export const WORKFLOW_FORMAT_VERSION = '1.0.0';
 
 const initialNodeExecutionState: Omit<NodeExecutionState, 'nodeId'> = {
-  status: NodeStatus.PENDING,
+  status: zNodeStatus.enum.PENDING,
   error: null,
   progress: null,
   progressImage: null,
@@ -117,13 +116,13 @@ export const initialNodesState: NodesState = {
   selectionMode: SelectionMode.Partial,
 };
 
-type FieldValueAction<T extends InputFieldValue> = PayloadAction<{
+type FieldValueAction<T extends FieldValue> = PayloadAction<{
   nodeId: string;
   fieldName: string;
-  value: T['value'];
+  value: T;
 }>;
 
-const fieldValueReducer = <T extends InputFieldValue>(
+const fieldValueReducer = <T extends FieldValue>(
   state: NodesState,
   action: FieldValueAction<T>
 ) => {
@@ -161,12 +160,7 @@ const nodesSlice = createSlice({
       }
       state.nodes[nodeIndex] = action.payload.node;
     },
-    nodeAdded: (
-      state,
-      action: PayloadAction<
-        Node<InvocationNodeData | CurrentImageNodeData | NotesNodeData>
-      >
-    ) => {
+    nodeAdded: (state, action: PayloadAction<Node<AnyNodeData>>) => {
       const node = action.payload;
       const position = findUnoccupiedPosition(
         state.nodes,
@@ -258,8 +252,7 @@ const nodesSlice = createSlice({
         handleType === 'source'
           ? node.data.outputs[handleId]
           : node.data.inputs[handleId];
-      state.connectionStartFieldType =
-        field?.originalType ?? field?.type ?? null;
+      state.connectionStartFieldType = field?.type ?? null;
     },
     connectionMade: (state, action: PayloadAction<Connection>) => {
       const fieldType = state.connectionStartFieldType;
@@ -530,12 +523,7 @@ const nodesSlice = createSlice({
         state.edges = applyEdgeChanges(edgeChanges, state.edges);
       }
     },
-    nodesDeleted: (
-      state,
-      action: PayloadAction<
-        Node<InvocationNodeData | NotesNodeData | CurrentImageNodeData>[]
-      >
-    ) => {
+    nodesDeleted: (state, action: PayloadAction<Node<AnyNodeData>[]>) => {
       action.payload.forEach((node) => {
         state.workflow.exposedFields = state.workflow.exposedFields.filter(
           (f) => f.nodeId !== node.id
@@ -589,131 +577,93 @@ const nodesSlice = createSlice({
     },
     fieldStringValueChanged: (
       state,
-      action: FieldValueAction<StringInputFieldValue>
+      action: FieldValueAction<StringFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldNumberValueChanged: (
       state,
-      action: FieldValueAction<IntegerInputFieldValue | FloatInputFieldValue>
+      action: FieldValueAction<IntegerFieldValue | FloatFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldBooleanValueChanged: (
       state,
-      action: FieldValueAction<BooleanInputFieldValue>
+      action: FieldValueAction<BooleanFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldBoardValueChanged: (
       state,
-      action: FieldValueAction<BoardInputFieldValue>
+      action: FieldValueAction<BoardFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldImageValueChanged: (
       state,
-      action: FieldValueAction<ImageInputFieldValue>
+      action: FieldValueAction<ImageFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldColorValueChanged: (
       state,
-      action: FieldValueAction<ColorInputFieldValue>
+      action: FieldValueAction<ColorFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldMainModelValueChanged: (
       state,
-      action: FieldValueAction<MainModelInputFieldValue>
+      action: FieldValueAction<MainModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldRefinerModelValueChanged: (
       state,
-      action: FieldValueAction<SDXLRefinerModelInputFieldValue>
+      action: FieldValueAction<SDXLRefinerModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldVaeModelValueChanged: (
       state,
-      action: FieldValueAction<VaeModelInputFieldValue>
+      action: FieldValueAction<VAEModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldLoRAModelValueChanged: (
       state,
-      action: FieldValueAction<LoRAModelInputFieldValue>
+      action: FieldValueAction<LoRAModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldControlNetModelValueChanged: (
       state,
-      action: FieldValueAction<ControlNetModelInputFieldValue>
+      action: FieldValueAction<ControlNetModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldIPAdapterModelValueChanged: (
       state,
-      action: FieldValueAction<IPAdapterModelInputFieldValue>
+      action: FieldValueAction<IPAdapterModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldT2IAdapterModelValueChanged: (
       state,
-      action: FieldValueAction<T2IAdapterModelInputFieldValue>
+      action: FieldValueAction<T2IAdapterModelFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldEnumModelValueChanged: (
       state,
-      action: FieldValueAction<EnumInputFieldValue>
+      action: FieldValueAction<EnumFieldValue>
     ) => {
       fieldValueReducer(state, action);
     },
     fieldSchedulerValueChanged: (
       state,
-      action: FieldValueAction<SchedulerInputFieldValue>
+      action: FieldValueAction<SchedulerFieldValue>
     ) => {
       fieldValueReducer(state, action);
-    },
-    imageCollectionFieldValueChanged: (
-      state,
-      action: PayloadAction<{
-        nodeId: string;
-        fieldName: string;
-        value: ImageField[];
-      }>
-    ) => {
-      const { nodeId, fieldName, value } = action.payload;
-      const nodeIndex = state.nodes.findIndex((n) => n.id === nodeId);
-
-      if (nodeIndex === -1) {
-        return;
-      }
-
-      const node = state.nodes?.[nodeIndex];
-
-      if (!isInvocationNode(node)) {
-        return;
-      }
-
-      const input = node.data?.inputs[fieldName];
-      if (!input) {
-        return;
-      }
-
-      const currentValue = cloneDeep(input.value);
-
-      if (!currentValue) {
-        input.value = value;
-        return;
-      }
-
-      input.value = uniqBy(
-        (currentValue as ImageField[]).concat(value),
-        'image_name'
-      );
     },
     notesNodeValueChanged: (
       state,
@@ -962,14 +912,14 @@ const nodesSlice = createSlice({
       const { source_node_id } = action.payload.data;
       const node = state.nodeExecutionStates[source_node_id];
       if (node) {
-        node.status = NodeStatus.IN_PROGRESS;
+        node.status = zNodeStatus.enum.IN_PROGRESS;
       }
     });
     builder.addCase(appSocketInvocationComplete, (state, action) => {
       const { source_node_id, result } = action.payload.data;
       const nes = state.nodeExecutionStates[source_node_id];
       if (nes) {
-        nes.status = NodeStatus.COMPLETED;
+        nes.status = zNodeStatus.enum.COMPLETED;
         if (nes.progress !== null) {
           nes.progress = 1;
         }
@@ -980,7 +930,7 @@ const nodesSlice = createSlice({
       const { source_node_id } = action.payload.data;
       const node = state.nodeExecutionStates[source_node_id];
       if (node) {
-        node.status = NodeStatus.FAILED;
+        node.status = zNodeStatus.enum.FAILED;
         node.error = action.payload.data.error;
         node.progress = null;
         node.progressImage = null;
@@ -991,7 +941,7 @@ const nodesSlice = createSlice({
         action.payload.data;
       const node = state.nodeExecutionStates[source_node_id];
       if (node) {
-        node.status = NodeStatus.IN_PROGRESS;
+        node.status = zNodeStatus.enum.IN_PROGRESS;
         node.progress = (step + 1) / total_steps;
         node.progressImage = progress_image ?? null;
       }
@@ -999,7 +949,7 @@ const nodesSlice = createSlice({
     builder.addCase(appSocketQueueItemStatusChanged, (state, action) => {
       if (['in_progress'].includes(action.payload.data.queue_item.status)) {
         forEach(state.nodeExecutionStates, (nes) => {
-          nes.status = NodeStatus.PENDING;
+          nes.status = zNodeStatus.enum.PENDING;
           nes.error = null;
           nes.progress = null;
           nes.progressImage = null;
@@ -1038,7 +988,6 @@ export const {
   fieldSchedulerValueChanged,
   fieldStringValueChanged,
   fieldVaeModelValueChanged,
-  imageCollectionFieldValueChanged,
   mouseOverFieldChanged,
   mouseOverNodeChanged,
   nodeAdded,

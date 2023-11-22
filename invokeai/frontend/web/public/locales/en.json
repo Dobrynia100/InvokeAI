@@ -760,6 +760,8 @@
         "clipField": "Clip",
         "clipFieldDescription": "Tokenizer and text_encoder submodels.",
         "collection": "Collection",
+        "collectionFieldType": "{{name}} Collection",
+        "polymorphicFieldType": "{{name}} Polymorphic",
         "collectionDescription": "TODO",
         "collectionItem": "Collection Item",
         "collectionItemDescription": "TODO",

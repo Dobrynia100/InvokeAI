@@ -1,8 +1,7 @@
 import { logger } from 'app/logging/logger';
 import { parseify } from 'common/util/serialize';
 import { nodeTemplatesBuilt } from 'features/nodes/store/nodesSlice';
-import { parseSchema } from 'features/nodes/util/parseSchema';
-import { parseSchema as parseSchema_ } from 'features/nodes/util/parseSchema_';
+import { parseSchema } from 'features/nodes/util/parseSchema_';
 import { size } from 'lodash-es';
 import { receivedOpenAPISchema } from 'services/api/thunks/schema';
 import { startAppListening } from '..';
@@ -16,24 +15,19 @@ export const addReceivedOpenAPISchemaListener = () => {
 
       log.debug({ schemaJSON }, 'Received OpenAPI schema');
       const { nodesAllowlist, nodesDenylist } = getState().config;
-      // const nodeTemplates = parseSchema(
-      //   schemaJSON,
-      //   nodesAllowlist,
-      //   nodesDenylist
-      // );
-      const nodeTemplates_ = parseSchema_(
+
+      const nodeTemplates = parseSchema(
         schemaJSON,
         nodesAllowlist,
         nodesDenylist
       );
-      console.log(nodeTemplates_);
 
-      // log.debug(
-      //   { nodeTemplates: parseify(nodeTemplates) },
-      //   `Built ${size(nodeTemplates)} node templates`
-      // );
+      log.debug(
+        { nodeTemplates: parseify(nodeTemplates) },
+        `Built ${size(nodeTemplates)} node templates`
+      );
 
-      // dispatch(nodeTemplatesBuilt(nodeTemplates));
+      dispatch(nodeTemplatesBuilt(nodeTemplates));
     },
   });
 

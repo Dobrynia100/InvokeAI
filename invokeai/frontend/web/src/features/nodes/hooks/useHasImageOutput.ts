@@ -5,7 +5,7 @@ import { defaultSelectorOptions } from 'app/store/util/defaultMemoizeOptions';
 import { some } from 'lodash-es';
 import { useMemo } from 'react';
 import { IMAGE_FIELDS } from '../types/constants';
-import { isInvocationNode } from '../types/types';
+import { isInvocationNode } from '../types/invocation';
 
 export const useHasImageOutput = (nodeId: string) => {
   const selector = useMemo(
@@ -20,7 +20,7 @@ export const useHasImageOutput = (nodeId: string) => {
           return some(
             node.data.outputs,
             (output) =>
-              IMAGE_FIELDS.includes(output.type) &&
+              IMAGE_FIELDS.includes(output.type.name) &&
               // the image primitive node does not actually save the image, do not show the image-saving checkboxes
               node.data.type !== 'image'
           );

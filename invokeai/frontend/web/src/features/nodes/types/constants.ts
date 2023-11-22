@@ -111,7 +111,7 @@ export const POLYMORPHIC_TO_SINGLE_MAP: FieldTypeMap = {
   CustomPolymorphic: 'Custom',
 };
 
-export const TYPES_WITH_INPUT_COMPONENTS: FieldType[] = [
+export const TYPES_WITH_INPUT_COMPONENTS: string[] = [
   'string',
   'StringPolymorphic',
   'boolean',

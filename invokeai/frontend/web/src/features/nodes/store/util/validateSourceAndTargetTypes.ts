@@ -1,37 +1,25 @@
-import { FieldType } from 'features/nodes/types/types';
-import {
-  getBaseType,
-  getIsCollection,
-  getIsPolymorphic,
-} from './parseFieldType';
+import { FieldType } from 'features/nodes/types/field';
+import { isEqual } from 'lodash-es';
 
 /**
  * Validates that the source and target types are compatible for a connection.
- * @param sourceType The type of the source field. Must be the originalType if it exists.
- * @param targetType The type of the target field. Must be the originalType if it exists.
+ * @param sourceType The type of the source field.
+ * @param targetType The type of the target field.
  * @returns True if the connection is valid, false otherwise.
  */
 export const validateSourceAndTargetTypes = (
-  sourceType: FieldType | string,
-  targetType: FieldType | string
+  sourceType: FieldType,
+  targetType: FieldType
 ) => {
-  const isSourcePolymorphic = getIsPolymorphic(sourceType);
-  const isSourceCollection = getIsCollection(sourceType);
-  const sourceBaseType = getBaseType(sourceType);
-
-  const isTargetPolymorphic = getIsPolymorphic(targetType);
-  const isTargetCollection = getIsCollection(targetType);
-  const targetBaseType = getBaseType(targetType);
-
   // TODO: There's a bug with Collect -> Iterate nodes:
   // https://github.com/invoke-ai/InvokeAI/issues/3956
   // Once this is resolved, we can remove this check.
   // Note that 'Collection' here is a field type, not node type.
-  if (sourceType === 'Collection' && targetType === 'Collection') {
+  if (sourceType.name === 'Collection' && targetType.name === 'Collection') {
     return false;
   }
 
-  if (sourceType === targetType) {
+  if (isEqual(sourceType, targetType)) {
     return true;
   }
 
@@ -45,29 +33,40 @@ export const validateSourceAndTargetTypes = (
    */
 
   const isCollectionItemToNonCollection =
-    sourceType === 'CollectionItem' && !isTargetCollection;
+    sourceType.name === 'CollectionItem' && !targetType.isCollection;
 
   const isNonCollectionToCollectionItem =
-    targetType === 'CollectionItem' &&
-    !isSourceCollection &&
-    !isSourcePolymorphic;
+    targetType.name === 'CollectionItem' &&
+    !sourceType.isCollection &&
+    !sourceType.isPolymorphic;
 
   const isAnythingToPolymorphicOfSameBaseType =
-    isTargetPolymorphic && sourceBaseType === targetBaseType;
+    targetType.isPolymorphic && sourceType.name === targetType.name;
 
   const isGenericCollectionToAnyCollectionOrPolymorphic =
-    sourceType === 'Collection' && (isTargetCollection || isTargetPolymorphic);
+    sourceType.name === 'Collection' &&
+    (targetType.isCollection || targetType.isPolymorphic);
 
   const isCollectionToGenericCollection =
-    targetType === 'Collection' && isSourceCollection;
+    targetType.name === 'Collection' && sourceType.isCollection;
 
-  const isIntToFloat = sourceType === 'integer' && targetType === 'float';
+  const areBothTypesSingle =
+    !sourceType.isCollection &&
+    !sourceType.isPolymorphic &&
+    !targetType.isCollection &&
+    !targetType.isPolymorphic;
+
+  const isIntToFloat =
+    areBothTypesSingle &&
+    sourceType.name === 'IntegerField' &&
+    targetType.name === 'FloatField';
 
   const isIntOrFloatToString =
-    (sourceType === 'integer' || sourceType === 'float') &&
-    targetType === 'string';
+    areBothTypesSingle &&
+    (sourceType.name === 'IntegerField' || sourceType.name === 'FloatField') &&
+    targetType.name === 'StringField';
 
-  const isTargetAnyType = targetType === 'Any';
+  const isTargetAnyType = targetType.name === 'Any';
 
   // One of these must be true for the connection to be valid
   return (
