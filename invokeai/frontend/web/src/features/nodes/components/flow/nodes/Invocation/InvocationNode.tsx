@@ -47,7 +47,7 @@ const InvocationNode = ({ nodeId, isOpen, label, type, selected }: Props) => {
             }}
           >
             <Flex sx={{ flexDir: 'column', px: 2, w: 'full', h: 'full' }}>
-              <Grid gridTemplateColumns="1fr auto" gridAutoRows="1fr">
+              <Grid gridTemplateColumns="1fr auto" gridAutoRows="auto">
                 {inputConnectionFieldNames.map((fieldName, i) => (
                   <GridItem
                     gridColumnStart={1}

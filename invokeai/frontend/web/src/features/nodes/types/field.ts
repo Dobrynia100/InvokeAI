@@ -585,7 +585,7 @@ export const isSDXLRefinerModelFieldInputTemplate = (
 // #region VAEModelField
 
 export const zVAEModelFieldType = zFieldTypeBase.extend({
-  name: z.literal('VAEModelField'),
+  name: z.literal('VaeModelField'),
 });
 export const zVAEModelFieldValue = zVAEModelField.optional();
 export const zVAEModelFieldInputInstance = zFieldInputInstanceBase.extend({
@@ -876,17 +876,14 @@ export const isSchedulerFieldInputTemplate = (
 // #region OtherField
 
 /**
- * "Other" fields refers to fields for which we do not have a UI component:
- * - Fields like UNetField where we do not allow direct UI input
- * - Custom fields
+ * OtherField is a catchall for fields that don't have state in the UI. In other words, these fields
+ * do not support "direct" input, nor to they have UI input elements. Examples include:
+ * - Fields like UNetField or LatentsField. where we do not allow direct UI input
  * - Reserved fields like IsIntermediate
- *
- * Technically, this field type's name should be z.string().min(1), but using this widens the type to string
- * in the zFieldType union. Intersecting that with z.record(z.never(), z.never()) tricks TS into showing us
- * autocomplete when contructing fields, suggesting the literal field names but also accepting any string.
+ * - Any other field we don't have full-on schemas for
  */
 export const zOtherFieldType = zFieldTypeBase.extend({
-  name: z.intersection(z.string().min(1), z.record(z.never(), z.never())),
+  name: z.string().min(1),
 });
 export const zOtherFieldValue = z.undefined(); // we do not store anything for other field types
 export const zOtherFieldInputInstance = zFieldInputInstanceBase.extend({

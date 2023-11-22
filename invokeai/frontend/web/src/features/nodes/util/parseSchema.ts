@@ -2,24 +2,22 @@ import { logger } from 'app/logging/logger';
 import { parseify } from 'common/util/serialize';
 import { reduce, startCase } from 'lodash-es';
 import { OpenAPIV3_1 } from 'openapi-types';
-import { AnyInvocationType } from 'services/events/types';
+import { FieldInputTemplate, FieldOutputTemplate } from '../types/field';
+import { InvocationTemplate } from '../types/invocation';
 import {
-  InputFieldTemplate,
   InvocationSchemaObject,
-  InvocationTemplate,
-  OutputFieldTemplate,
-  isFieldType,
   isInvocationFieldSchema,
   isInvocationOutputSchemaObject,
   isInvocationSchemaObject,
-} from '../types/types';
-import { buildInputFieldTemplate, getFieldType } from './fieldTemplateBuilders';
+} from '../types/openapi';
+import { buildFieldInputTemplate } from './buildFieldInputTemplate';
+import { getFieldType } from './parseFieldType';
 
 const RESERVED_INPUT_FIELD_NAMES = ['id', 'type', 'use_cache'];
 const RESERVED_OUTPUT_FIELD_NAMES = ['type'];
 const RESERVED_FIELD_TYPES = ['IsIntermediate'];
 
-const invocationDenylist: AnyInvocationType[] = ['graph', 'linear_ui_output'];
+const invocationDenylist: string[] = ['graph', 'linear_ui_output'];
 
 const isReservedInputField = (nodeType: string, fieldName: string) => {
   if (RESERVED_INPUT_FIELD_NAMES.includes(fieldName)) {
@@ -83,7 +81,7 @@ export const parseSchema = (
     const inputs = reduce(
       schema.properties,
       (
-        inputsAccumulator: Record<string, InputFieldTemplate>,
+        inputsAccumulator: Record<string, FieldInputTemplate>,
         property,
         propertyName
       ) => {
@@ -103,11 +101,15 @@ export const parseSchema = (
           return inputsAccumulator;
         }
 
-        const fieldTypeResult = property.ui_type
-          ? { type: property.ui_type, originalType: property.ui_type }
+        const fieldType = property.ui_type
+          ? {
+              name: property.ui_type,
+              isCollection: false,
+              isPolymorphic: false,
+            }
           : getFieldType(property);
 
-        if (!fieldTypeResult) {
+        if (!fieldType) {
           logger('nodes').warn(
             {
               node: type,
@@ -119,15 +121,13 @@ export const parseSchema = (
           return inputsAccumulator;
         }
 
-        // stash this for custom types
-        const { type: fieldType, originalType } = fieldTypeResult;
-
-        if (fieldType === 'WorkflowField') {
+        if (fieldType.name === 'WorkflowField') {
+          // this *invocation* supports workflows, flag it
           withWorkflow = true;
           return inputsAccumulator;
         }
 
-        if (isReservedFieldType(fieldType)) {
+        if (isReservedFieldType(fieldType.name)) {
           logger('nodes').trace(
             {
               node: type,
@@ -140,37 +140,11 @@ export const parseSchema = (
           return inputsAccumulator;
         }
 
-        if (!isFieldType(originalType)) {
-          logger('nodes').debug(
-            {
-              node: type,
-              fieldName: propertyName,
-              fieldType,
-              field: parseify(property),
-            },
-            `Fallback handling for unknown input field type: ${fieldType}`
-          );
-        }
-
-        if (!isFieldType(fieldType)) {
-          logger('nodes').warn(
-            {
-              node: type,
-              fieldName: propertyName,
-              fieldType,
-              field: parseify(property),
-            },
-            `Unable to parse field type: ${fieldType}`
-          );
-          return inputsAccumulator;
-        }
-
-        const field = buildInputFieldTemplate(
+        const field = buildFieldInputTemplate(
           schema,
           property,
           propertyName,
-          fieldType,
-          originalType
+          fieldType
         );
 
         if (!field) {
@@ -179,7 +153,6 @@ export const parseSchema = (
               node: type,
               fieldName: propertyName,
               fieldType,
-              originalType,
               field: parseify(property),
             },
             'Skipping input field with no template'
@@ -238,11 +211,15 @@ export const parseSchema = (
           return outputsAccumulator;
         }
 
-        const fieldTypeResult = property.ui_type
-          ? { type: property.ui_type, originalType: property.ui_type }
+        const fieldType = property.ui_type
+          ? {
+              name: property.ui_type,
+              isCollection: false,
+              isPolymorphic: false,
+            }
           : getFieldType(property);
 
-        if (!fieldTypeResult) {
+        if (!fieldType) {
           logger('nodes').warn(
             {
               node: type,
@@ -250,34 +227,6 @@ export const parseSchema = (
               field: parseify(property),
             },
             'Missing output field type'
-          );
-          return outputsAccumulator;
-        }
-
-        const { type: fieldType, originalType } = fieldTypeResult;
-
-        if (!isFieldType(fieldType)) {
-          logger('nodes').debug(
-            {
-              node: type,
-              fieldName: propertyName,
-              fieldType,
-              originalType,
-              field: parseify(property),
-            },
-            `Fallback handling for unknown output field type: ${fieldType}`
-          );
-        }
-
-        if (!isFieldType(fieldType)) {
-          logger('nodes').warn(
-            {
-              node: type,
-              fieldName: propertyName,
-              fieldType,
-              field: parseify(property),
-            },
-            `Unable to parse field type: ${fieldType}`
           );
           return outputsAccumulator;
         }
@@ -292,12 +241,11 @@ export const parseSchema = (
           ui_hidden: property.ui_hidden ?? false,
           ui_type: property.ui_type,
           ui_order: property.ui_order,
-          originalType,
         };
 
         return outputsAccumulator;
       },
-      {} as Record<string, OutputFieldTemplate>
+      {} as Record<string, FieldOutputTemplate>
     );
 
     const useCache = schema.properties.use_cache.default;

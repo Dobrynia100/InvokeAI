@@ -4,7 +4,7 @@ import {
   Workflow,
   WorkflowWarning,
   isWorkflowInvocationNode,
-} from '../types/types';
+} from '../types/workflow';
 import { parseify } from 'common/util/serialize';
 import i18n from 'i18next';
 import { InvocationTemplate } from '../types/invocation';
@@ -34,7 +34,7 @@ export const validateWorkflow = (
             'nodes.doesNotExist'
           )}`,
         ],
-        data: node,
+        data: parseify(node),
       });
       return;
     }
@@ -53,7 +53,7 @@ export const validateWorkflow = (
             node.data.version
           } ${i18n.t('nodes.maybeIncompatible')} v${nodeTemplate.version}`,
         ],
-        data: { node, nodeTemplate: parseify(nodeTemplate) },
+        data: parseify({ node, nodeTemplate }),
       });
       return;
     }

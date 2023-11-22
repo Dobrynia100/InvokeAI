@@ -2,7 +2,7 @@ import { ListItem, Text, UnorderedList } from '@chakra-ui/react';
 import { useLogger } from 'app/logging/useLogger';
 import { useAppDispatch } from 'app/store/storeHooks';
 import { parseify } from 'common/util/serialize';
-import { zWorkflow } from 'features/nodes/types/types';
+import { zWorkflow } from 'features/nodes/types/workflow';
 import { addToast } from 'features/system/store/systemSlice';
 import { makeToast } from 'features/system/util/makeToast';
 import { memo, useCallback } from 'react';

@@ -24,7 +24,7 @@ import {
   IPAdapterMetadataItem,
   LoRAMetadataItem,
   T2IAdapterMetadataItem,
-} from 'features/nodes/types/types';
+} from 'features/nodes/types/metadata';
 import {
   refinerModelChanged,
   setNegativeStylePromptSDXL,

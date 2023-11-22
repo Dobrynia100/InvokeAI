@@ -57,7 +57,7 @@ import {
   NodeExecutionState,
   zNodeStatus,
 } from '../types/invocation';
-import { Workflow } from '../types/types';
+import { Workflow } from '../types/workflow';
 import { NodesState } from './types';
 import { findConnectionToValidHandle } from './util/findConnectionToValidHandle';
 import { findUnoccupiedPosition } from './util/findUnoccupiedPosition';
@@ -96,7 +96,6 @@ export const initialNodesState: NodesState = {
   connectionMade: false,
   modifyingEdge: false,
   addNewNodePosition: null,
-  shouldShowFieldTypeLegend: false,
   shouldShowMinimapPanel: true,
   shouldValidateGraph: true,
   shouldAnimateEdges: true,
@@ -677,12 +676,6 @@ const nodesSlice = createSlice({
       }
       node.data.notes = value;
     },
-    shouldShowFieldTypeLegendChanged: (
-      state,
-      action: PayloadAction<boolean>
-    ) => {
-      state.shouldShowFieldTypeLegend = action.payload;
-    },
     shouldShowMinimapPanelChanged: (state, action: PayloadAction<boolean>) => {
       state.shouldShowMinimapPanel = action.payload;
     },
@@ -1013,7 +1006,6 @@ export const {
   selectionPasted,
   shouldAnimateEdgesChanged,
   shouldColorEdgesChanged,
-  shouldShowFieldTypeLegendChanged,
   shouldShowMinimapPanelChanged,
   shouldSnapToGridChanged,
   shouldValidateGraphChanged,

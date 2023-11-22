@@ -13,7 +13,7 @@ import {
   InvocationTemplate,
   NodeExecutionState,
 } from '../types/invocation';
-import { Workflow } from '../types/types';
+import { Workflow } from '../types/workflow';
 
 export type NodesState = {
   nodes: Node<AnyNodeData>[];
@@ -23,7 +23,6 @@ export type NodesState = {
   connectionStartFieldType: FieldType | null;
   connectionMade: boolean;
   modifyingEdge: boolean;
-  shouldShowFieldTypeLegend: boolean;
   shouldShowMinimapPanel: boolean;
   shouldValidateGraph: boolean;
   shouldAnimateEdges: boolean;

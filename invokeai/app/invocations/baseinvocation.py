@@ -648,8 +648,6 @@ class _Model(BaseModel):
 # Get all pydantic model attrs, methods, etc
 RESERVED_PYDANTIC_FIELD_NAMES = {m[0] for m in inspect.getmembers(_Model())}
 
-RESERVED_INVOKEAI_FIELD_NAMES = {"Custom", "CustomCollection", "CustomPolymorphic"}
-
 
 def validate_fields(model_fields: dict[str, FieldInfo], model_type: str) -> None:
     """
@@ -664,23 +662,6 @@ def validate_fields(model_fields: dict[str, FieldInfo], model_type: str) -> None
 
         if not field.annotation:
             raise InvalidFieldError(f'Invalid field type "{name}" on "{model_type}" (missing annotation)')
-
-        annotation_name = (
-            field.annotation.__forward_arg__ if isinstance(field.annotation, ForwardRef) else field.annotation.__name__
-        )
-
-        if annotation_name.endswith("Polymorphic"):
-            raise InvalidFieldError(
-                f'Invalid field type "{annotation_name}" for "{name}" on "{model_type}" (must not end in "Polymorphic")'
-            )
-
-        if annotation_name.endswith("Collection"):
-            raise InvalidFieldError(
-                f'Invalid field type "{annotation_name}" for "{name}" on "{model_type}" (must not end in "Collection")'
-            )
-
-        if annotation_name in RESERVED_INVOKEAI_FIELD_NAMES:
-            raise InvalidFieldError(f'Invalid field type "{annotation_name}" for "{name}" on "{model_type}" (reserved)')
 
         field_kind = (
             # _field_kind is defined via InputField(), OutputField() or by one of the internal fields defined in this file
@@ -870,5 +851,5 @@ class WithMetadata(BaseModel):
     metadata: Optional[MetadataField] = Field(
         default=None,
         description=FieldDescriptions.metadata,
-        json_schema_extra={"_field_kind": "internal", "input": Input.Connection},
+        json_schema_extra={"_field_kind": "internal"},
     )

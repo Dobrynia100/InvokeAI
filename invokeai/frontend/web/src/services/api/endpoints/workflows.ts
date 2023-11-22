@@ -1,5 +1,5 @@
 import { logger } from 'app/logging/logger';
-import { Workflow, zWorkflow } from 'features/nodes/types/types';
+import { Workflow, zWorkflow } from 'features/nodes/types/workflow';
 import { api } from '..';
 import { paths } from '../schema';
 

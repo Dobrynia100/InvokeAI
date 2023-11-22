@@ -1,6 +1,7 @@
 import { UseToastOptions } from '@chakra-ui/react';
 import { EntityState } from '@reduxjs/toolkit';
 import { components, paths } from './schema';
+import { O } from 'ts-toolbelt';
 
 type s = components['schemas'];
 
@@ -105,6 +106,7 @@ export type ImportModelConfig = s['Body_import_model'];
 
 // Graphs
 export type Graph = s['Graph'];
+export type NonNullableGraph = O.Required<Graph, 'nodes' | 'edges'>;
 export type Edge = s['Edge'];
 export type GraphExecutionState = s['GraphExecutionState'];
 export type Batch = s['Batch'];

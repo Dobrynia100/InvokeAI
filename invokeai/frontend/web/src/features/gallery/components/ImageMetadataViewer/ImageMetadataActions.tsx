@@ -4,7 +4,7 @@ import {
   LoRAMetadataItem,
   IPAdapterMetadataItem,
   T2IAdapterMetadataItem,
-} from 'features/nodes/types/types';
+} from 'features/nodes/types/metadata';
 import { useRecallParameters } from 'features/parameters/hooks/useRecallParameters';
 import { memo, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -9,7 +9,7 @@ import {
   InvocationTemplate,
   NotesNodeData,
 } from 'features/nodes/types/invocation';
-import { buildFieldInputInstance } from 'features/nodes/util/fieldValueBuilders';
+import { buildFieldInputInstance } from 'features/nodes/util/buildFieldInputInstance';
 import { reduce } from 'lodash-es';
 import { Node, XYPosition } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
